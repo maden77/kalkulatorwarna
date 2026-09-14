@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2c3e50">
+<title>Kalkulator Warna RGB</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎨 Kalkulator Warna RGB</h1>
+    <p class="subtitle">Gabungkan dua warna untuk menghasilkan warna baru</p>
+  </header>
+
+  <div class="color-inputs">
+    <div class="color-box">
+      <label>Warna 1</label>
+      <div class="color-preview" id="preview1" style="background:#ff0000"></div>
+      <input type="color" id="color1" value="#ff0000">
+      <div class="rgb-inputs">
+        <div><label>R</label><input type="number" id="r1" min="0" max="255" value="255"></div>
+        <div><label>G</label><input type="number" id="g1" min="0" max="255" value="0"></div>
+        <div><label>B</label><input type="number" id="b1" min="0" max="255" value="0"></div>
+      </div>
+    </div>
+
+    <div class="plus">+</div>
+
+    <div class="color-box">
+      <label>Warna 2</label>
+      <div class="color-preview" id="preview2" style="background:#0000ff"></div>
+      <input type="color" id="color2" value="#0000ff">
+      <div class="rgb-inputs">
+        <div><label>R</label><input type="number" id="r2" min="0" max="255" value="0"></div>
+        <div><label>G</label><input type="number" id="g2" min="0" max="255" value="0"></div>
+        <div><label>B</label><input type="number" id="b2" min="0" max="255" value="255"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-selector">
+    <label>Mode Penggabungan:</label>
+    <select id="mode">
+      <option value="add">Penjumlahan (Add)</option>
+      <option value="average" selected>Rata-rata (Average)</option>
+      <option value="multiply">Perkalian (Multiply)</option>
+      <option value="screen">Screen</option>
+      <option value="subtract">Pengurangan (Subtract)</option>
+      <option value="difference">Difference</option>
+    </select>
+  </div>
+
+  <div class="result-section">
+    <h2>Hasil Warna</h2>
+    <div class="result-preview" id="resultPreview"></div>
+    <div class="result-info">
+      <div class="info-item">
+        <span>HEX</span>
+        <strong id="resultHex">#800080</strong>
+      </div>
+      <div class="info-item">
+        <span>RGB</span>
+        <strong id="resultRgb">rgb(128, 0, 128)</strong>
+      </div>
+      <div class="info-item">
+        <span>HSL</span>
+        <strong id="resultHsl">hsl(300, 100%, 25%)</strong>
+      </div>
+    </div>
+    <button id="downloadBtn" class="download-btn">⬇️ Download Warna (PNG)</button>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
