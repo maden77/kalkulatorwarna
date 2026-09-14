@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Generate Icons</title></head>
+<body>
+<h2>Generate Icons (Klik tombol lalu save PNG ke folder project)</h2>
+<canvas id="c192" width="192" height="192" style="border:1px solid #ccc"></canvas>
+<canvas id="c512" width="512" height="512" style="border:1px solid #ccc"></canvas>
+<br>
+<button onclick="download(192)">Download icon-192.png</button>
+<button onclick="download(512)">Download icon-512.png</button>
+
+<script>
+function drawIcon(canvas) {
+  const ctx = canvas.getContext('2d');
+  const s = canvas.width;
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, s, s);
+  grad.addColorStop(0, '#667eea');
+  grad.addColorStop(1, '#764ba2');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, s, s);
+
+  // Rounded color circles (simbol RGB blend)
+  const r = s * 0.22;
+  const cx = s / 2, cy = s / 2;
+  const offset = s * 0.13;
+
+  ctx.globalCompositeOperation = 'screen';
+
+  ctx.fillStyle = '#ff0000';
+  ctx.beginPath();
+  ctx.arc(cx - offset, cy - offset * 0.6, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#00ff00';
+  ctx.beginPath();
+  ctx.arc(cx + offset, cy - offset * 0.6, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#0000ff';
+  ctx.beginPath();
+  ctx.arc(cx, cy + offset * 0.8, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function download(size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  drawIcon(canvas);
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `icon-${size}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+</script>
+</body>
+</html>
