@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konverter & Pembuat Stiker WA WebP Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f8fafc;
+        }
+        .font-heading {
+            font-family: 'Poppins', sans-serif;
+        }
+        .canvas-checkerboard {
+            background-color: #111827;
+            background-image: 
+                linear-gradient(45deg, #1f2937 25%, transparent 25%), 
+                linear-gradient(-45deg, #1f2937 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #1f2937 75%), 
+                linear-gradient(-45deg, transparent 75%, #1f2937 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 8px;
+        }
+        .glow-effect {
+            box-shadow: 0 0 25px -5px rgba(34, 197, 94, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-extrabold text-xl shadow-lg glow-effect">
+                    <i class="fa-solid fa-face-smile-wink"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-lg leading-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 bg-clip-text text-transparent">
+                        WA WebP Sticker Studio
+                    </h1>
+                    <p class="text-xs text-slate-400">Pembuat & Konverter Stiker WA (512x512)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Standar WA (512x512)
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Studio Workspace -->
+    <main class="max-w-7xl mx-auto w-full p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+        
+        <!-- Canvas Preview & Download Panel (Left Side) -->
+        <section class="lg:col-span-5 flex flex-col items-center justify-start gap-4">
+            <div class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 md:p-6 flex flex-col items-center shadow-2xl relative">
+                
+                <div class="w-full flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-emerald-400"></i> Pratinjau Canvas
+                    </span>
+                    <button id="resetCanvasBtn" class="text-xs text-slate-400 hover:text-rose-400 transition-colors flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+
+                <!-- Live Canvas Display with Drag Support -->
+                <div class="relative w-full max-w-[340px] aspect-square rounded-2xl overflow-hidden canvas-checkerboard border-2 border-slate-700/80 shadow-2xl flex items-center justify-center group">
+                    <canvas id="stickerCanvas" width="512" height="512" class="w-full h-full object-contain touch-none cursor-grab active:cursor-grabbing"></canvas>
+                    
+                    <!-- Drag Helper Overlay -->
+                    <div class="absolute bottom-2 left-2 right-2 bg-slate-950/70 backdrop-blur-xs py-1 px-2 rounded-lg text-[10px] text-slate-300 text-center pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                        <i class="fa-solid fa-hand-pointer text-emerald-400 mr-1"></i> Geser/drag gambar langsung di canvas
+                    </div>
+
+                    <!-- Loading / Processing Overlay -->
+                    <div id="loadingOverlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex-col items-center justify-center gap-3 p-4 text-center z-10">
+                        <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span id="loadingOverlayText" class="text-xs text-emerald-400 font-semibold">Memproses media...</span>
+                    </div>
+                </div>
+
+                <div class="w-full mt-3 flex items-center justify-between text-xs text-slate-400 px-1">
+                    <span>Dimensi: <strong class="text-slate-200">512 x 512 px</strong></span>
+                    <span id="stickerTypeBadge" class="px-2 py-0.5 rounded bg-slate-800 text-emerald-400 border border-slate-700">Animasi WebP</span>
+                </div>
+
+                <!-- Export Progress Bar -->
+                <div id="progressContainer" class="w-full mt-4 hidden">
+                    <div class="flex justify-between text-xs text-slate-300 mb-1">
+                        <span id="progressText">Merangkai Stiker Animasi...</span>
+                        <span id="progressPercent" class="font-bold text-emerald-400">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
+                        <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-0 transition-all duration-150"></div>
+                    </div>
+                </div>
+
+                <!-- Action Download Buttons -->
+                <div class="w-full mt-5 flex flex-col gap-2.5">
+                    <button id="downloadWebpBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-emerald-500/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg group-hover:rotate-12 transition-transform"></i>
+                        <span id="downloadBtnText">Buat & Unduh Stiker .WEBP</span>
+                    </button>
+
+                    <button id="downloadPngBtn" class="w-full bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 font-medium py-2.5 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-image text-slate-400"></i>
+                        <span>Ekspor Frame Gambar (.PNG)</span>
+                    </button>
+                </div>
+
+                <!-- Quick Help -->
+                <div class="w-full mt-4 p-3 bg-slate-950/80 border border-slate-800/80 rounded-xl text-xs text-slate-400 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-info text-emerald-400 text-base mt-0.5 shrink-0"></i>
+                    <div class="space-y-1">
+                        <p class="font-semibold text-slate-300">Cara Memasang di WhatsApp:</p>
+                        <p class="text-[11px] leading-relaxed">Simpan file <code class="bg-slate-800 px-1 py-0.5 rounded text-emerald-400">.webp</code>. Kirim sebagai <em>Dokumen</em> / File di chat WA, atau buka via aplikasi pembuat stiker di ponsel Anda.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Side Control Panel Tabs -->
+        <section class="lg:col-span-7 flex flex-col gap-5">
+            
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl">
+                
+                <!-- Navigation Tabs -->
+                <div class="flex border-b border-slate-800 mb-5 gap-1 overflow-x-auto pb-2 custom-scrollbar">
+                    <button id="tabUploadBtn" class="px-4 py-2 text-xs md:text-sm font-semibold text-emerald-400 border-b-2 border-emerald-400 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload Media
+                    </button>
+                    <button id="tabModeBtn" class="px-4 py-2 text-xs md:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-icons"></i> Maskot Pre-made
+                    </button>
+                    <button id="tabTextBtn" class="px-4 py-2 text-xs md:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-font"></i> Teks & Meme
+                    </button>
+                    <button id="tabEffectsBtn" class="px-4 py-2 text-xs md:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Efek & Outlines
+                    </button>
+                </div>
+
+                <!-- TAB 1: Media Uploader (Video, GIF, Photos) -->
+                <div id="tabUploadContent" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                            Unggah Video (MP4/WebM), GIF, atau Gambar (PNG/JPG)
+                        </label>
+                        <div class="relative border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-2xl p-6 text-center bg-slate-800/40 hover:bg-slate-800/80 transition-all cursor-pointer group">
+                            <input type="file" id="mediaUploadInput" accept="image/*,video/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                            <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-file-video text-2xl"></i>
+                            </div>
+                            <div class="text-sm font-bold text-slate-200">Klik atau Seret File Ke Sini</div>
+                            <div class="text-xs text-slate-400 mt-1">Mendukung MP4, WebM, Animated GIF, PNG, JPG</div>
+                        </div>
+
+                        <!-- Instant Sample Media Buttons -->
+                        <div class="mt-3 flex items-center gap-2">
+                            <span class="text-xs text-slate-400">Atau coba sampel cepat:</span>
+                            <button id="sampleImageBtn" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg text-xs font-medium border border-slate-700 flex items-center gap-1">
+                                <i class="fa-solid fa-image"></i> Sampel Foto
+                            </button>
+                            <button id="sampleVideoBtn" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-lg text-xs font-medium border border-slate-700 flex items-center gap-1">
+                                <i class="fa-solid fa-film"></i> Sampel Video
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Uploaded Media Controls -->
+                    <div id="uploadedMediaControls" class="space-y-4 hidden p-4 bg-slate-950/60 border border-slate-800 rounded-xl">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                                <i class="fa-solid fa-photo-film"></i> Pengaturan Posisi & Skala Media
+                            </span>
+                            <button id="removeUploadedMediaBtn" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1">
+                                <i class="fa-solid fa-trash"></i> Hapus Media
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Skala / Ukuran</label>
+                                <input type="range" id="mediaScaleInput" min="0.2" max="2.5" step="0.05" value="1.0" class="w-full accent-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Rotasi Gambar</label>
+                                <input type="range" id="mediaRotateInput" min="-180" max="180" step="5" value="0" class="w-full accent-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Posisi Horizontal (X)</label>
+                                <input type="range" id="mediaOffsetXInput" min="-250" max="250" step="2" value="0" class="w-full accent-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Posisi Vertikal (Y)</label>
+                                <input type="range" id="mediaOffsetYInput" min="-250" max="250" step="2" value="0" class="w-full accent-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Pre-made Mascot Characters -->
+                <div id="tabModeContent" class="space-y-5 hidden">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                            Mode Output Stiker
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button id="typeAnimatedBtn" class="p-3 bg-emerald-500/10 border-2 border-emerald-500 rounded-xl text-left hover:bg-emerald-500/20 transition-all flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-film"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-100">Bergerak (Animasi)</div>
+                                    <div class="text-[10px] text-slate-400">Looping Animated WebP</div>
+                                </div>
+                            </button>
+
+                            <button id="typeStaticBtn" class="p-3 bg-slate-800 border-2 border-slate-700 rounded-xl text-left hover:bg-slate-750 transition-all flex items-center gap-3 opacity-70">
+                                <div class="w-8 h-8 rounded-lg bg-slate-700 text-slate-300 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-image"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-100">Statis (Diam)</div>
+                                    <div class="text-[10px] text-slate-400">Single Frame WebP</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preset Character / Mascot Selection -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                            Pilih Karakter Maskot
+                        </label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button data-character="sprout" class="char-btn p-2 bg-emerald-500/20 border border-emerald-500 rounded-xl text-center text-xs font-semibold hover:bg-emerald-500/30 transition-all">
+                                <div class="text-2xl mb-1">🌱</div>
+                                Tauge
+                            </button>
+                            <button data-character="cat" class="char-btn p-2 bg-slate-800 border border-slate-700 rounded-xl text-center text-xs font-semibold hover:bg-slate-700 transition-all">
+                                <div class="text-2xl mb-1">🐱</div>
+                                Kucing
+                            </button>
+                            <button data-character="ghost" class="char-btn p-2 bg-slate-800 border border-slate-700 rounded-xl text-center text-xs font-semibold hover:bg-slate-700 transition-all">
+                                <div class="text-2xl mb-1">👻</div>
+                                Hantu Utu
+                            </button>
+                            <button data-character="fire" class="char-btn p-2 bg-slate-800 border border-slate-700 rounded-xl text-center text-xs font-semibold hover:bg-slate-700 transition-all">
+                                <div class="text-2xl mb-1">🔥</div>
+                                Api Ceria
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Animation Style Controls -->
+                    <div id="animationControls" class="space-y-4">
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                            Gaya Gerakan Maskot
+                        </label>
+                        <select id="animStyleSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="bounce">Melompat & Memantul (Bounce)</option>
+                            <option value="rotate">Goyang Berputar (Wiggle Rotate)</option>
+                            <option value="pulse">Membesar & Mengecil (Pulse Breath)</option>
+                            <option value="float">Melayang Halus (Floating)</option>
+                        </select>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Kecepatan Gerakan</label>
+                                <input type="range" id="animSpeedInput" min="0.5" max="3" step="0.1" value="1" class="w-full accent-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Skala Maskot</label>
+                                <input type="range" id="charScaleInput" min="0.5" max="1.5" step="0.1" value="1" class="w-full accent-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Text & Meme Controls -->
+                <div id="tabTextContent" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Teks Atas (Top Caption)</label>
+                        <input type="text" id="topTextInput" placeholder="Contoh: KETIKA KAMU..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Teks Bawah (Bottom Caption)</label>
+                        <input type="text" id="bottomTextInput" placeholder="Contoh: BELUM TIDUR JAM 3 PAGI" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Warna Isi Teks</label>
+                            <input type="color" id="textColorInput" value="#ffffff" class="w-full h-10 bg-slate-800 border border-slate-700 rounded-xl cursor-pointer p-1">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Warna Garis Pinggir (Stroke)</label>
+                            <input type="color" id="textStrokeInput" value="#000000" class="w-full h-10 bg-slate-800 border border-slate-700 rounded-xl cursor-pointer p-1">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Ukuran Font</label>
+                            <input type="range" id="fontSizeInput" min="20" max="75" value="42" class="w-full accent-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Gaya Font Teks</label>
+                            <select id="fontFamilySelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <option value="Impact">Impact Meme Classic</option>
+                                <option value="'Poppins', sans-serif">Poppins Bold</option>
+                                <option value="'Arial Black', sans-serif">Arial Black</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: Sticker Cutout & Effects -->
+                <div id="tabEffectsContent" class="space-y-4 hidden">
+                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-200">Outline Garis Tepi Stiker (White Cutout)</div>
+                                <div class="text-xs text-slate-400">Efek batas putih tebal seperti stiker fisik nyata</div>
+                            </div>
+                            <input type="checkbox" id="stickerBorderToggle" class="w-5 h-5 accent-emerald-500 cursor-pointer">
+                        </div>
+
+                        <div id="stickerBorderControls" class="space-y-3 pt-2 border-t border-slate-800 hidden">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Ketebalan Garis</label>
+                                    <input type="range" id="borderWidthInput" min="4" max="24" value="12" class="w-full accent-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Warna Garis Cutout</label>
+                                    <input type="color" id="borderColorInput" value="#ffffff" class="w-full h-8 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer p-0.5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Bentuk Pemotongan (Crop Mask)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button data-shape="none" class="shape-btn p-2.5 bg-emerald-500/20 border border-emerald-500 rounded-xl text-xs font-semibold text-slate-200 text-center hover:bg-emerald-500/30">
+                                Penuh (Original)
+                            </button>
+                            <button data-shape="circle" class="shape-btn p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 text-center hover:bg-slate-750">
+                                Lingkaran
+                            </button>
+                            <button data-shape="rounded" class="shape-btn p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 text-center hover:bg-slate-750">
+                                Lengkung (Rounded)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Sticker Output Preview Modal -->
+    <div id="resultModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col items-center gap-4 relative animate-in fade-in zoom-in duration-200">
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 text-lg w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center">
+                <h3 class="text-lg font-bold text-emerald-400 font-heading flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i> Stiker Berhasil Dibuat!
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">Pratinjau stiker 512x512 px siap pakai</p>
+            </div>
+
+            <div class="w-64 h-64 canvas-checkerboard rounded-xl border border-slate-700 p-2 flex items-center justify-center shadow-inner overflow-hidden">
+                <img id="resultImagePreview" class="max-w-full max-h-full object-contain" alt="Sticker Preview">
+            </div>
+
+            <div class="w-full flex flex-col gap-2">
+                <a id="modalDownloadBtn" href="#" download="stiker_wa.webp" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-center text-sm shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> Unduh File Stiker (.WEBP)
+                </a>
+
+                <button id="modalOpenTabBtn" class="w-full bg-slate-800 hover:bg-slate-750 text-slate-200 py-2.5 rounded-xl text-xs font-semibold border border-slate-700 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-up-right-from-square"></i> Buka Gambar di Tab Baru
+                </button>
+
+                <button id="modalCopyBtn" class="w-full bg-slate-800 hover:bg-slate-750 text-slate-200 py-2 rounded-xl text-xs font-semibold border border-slate-700 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Salin Gambar ke Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Overlay -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-emerald-500/50 text-slate-100 px-5 py-3 rounded-xl font-medium shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMsg">Stiker Berhasil Dibuat!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/50 py-4 text-center text-xs text-slate-500">
+        <p>WA WebP Sticker Studio &bull; Pemrosesan Aman 100% Client-Side Tanpa Upload Server &bull; Format Standar WA 512x512 px</p>
+    </footer>
+
+    <!-- JavaScript Application Core -->
+    <script>
+        const canvas = document.getElementById('stickerCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Application State
+        let isAnimated = true;
+        let characterType = 'sprout';
+        let animationStyle = 'bounce';
+        let animationSpeed = 1.0;
+        let characterScale = 1.0;
+        
+        let topText = '';
+        let bottomText = '';
+        let textColor = '#ffffff';
+        let strokeColor = '#000000';
+        let fontSize = 42;
+        let fontFamily = "Impact";
+
+        // Custom Uploaded Media State
+        let uploadedImage = null;
+        let uploadedVideo = null;
+        let mediaType = null; // 'image' or 'video'
+        let mediaScale = 1.0;
+        let mediaRotate = 0;
+        let mediaOffsetX = 0;
+        let mediaOffsetY = 0;
+
+        // Effects State
+        let enableStickerBorder = false;
+        let borderWidth = 12;
+        let borderColor = '#ffffff';
+        let cropShape = 'none'; // 'none', 'circle', 'rounded'
+
+        let time = 0;
+        let animFrameId = null;
+        let currentGeneratedBlob = null;
+        let currentObjectUrl = null;
+
+        // UI Element References
+        const downloadWebpBtn = document.getElementById('downloadWebpBtn');
+        const downloadPngBtn = document.getElementById('downloadPngBtn');
+        const downloadBtnText = document.getElementById('downloadBtnText');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingOverlayText = document.getElementById('loadingOverlayText');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        const toastIcon = document.getElementById('toastIcon');
+
+        // Result Modal
+        const resultModal = document.getElementById('resultModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const resultImagePreview = document.getElementById('resultImagePreview');
+        const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+        const modalOpenTabBtn = document.getElementById('modalOpenTabBtn');
+        const modalCopyBtn = document.getElementById('modalCopyBtn');
+
+        // Navigation Tabs
+        const tabUploadBtn = document.getElementById('tabUploadBtn');
+        const tabModeBtn = document.getElementById('tabModeBtn');
+        const tabTextBtn = document.getElementById('tabTextBtn');
+        const tabEffectsBtn = document.getElementById('tabEffectsBtn');
+
+        const tabUploadContent = document.getElementById('tabUploadContent');
+        const tabModeContent = document.getElementById('tabModeContent');
+        const tabTextContent = document.getElementById('tabTextContent');
+        const tabEffectsContent = document.getElementById('tabEffectsContent');
+
+        function switchTab(activeBtn, showContent) {
+            [tabUploadBtn, tabModeBtn, tabTextBtn, tabEffectsBtn].forEach(btn => {
+                btn.classList.remove('text-emerald-400', 'border-emerald-400');
+                btn.classList.add('text-slate-400', 'border-transparent');
+            });
+            [tabUploadContent, tabModeContent, tabTextContent, tabEffectsContent].forEach(c => c.classList.add('hidden'));
+
+            activeBtn.classList.remove('text-slate-400', 'border-transparent');
+            activeBtn.classList.add('text-emerald-400', 'border-emerald-400');
+            showContent.classList.remove('hidden');
+        }
+
+        tabUploadBtn.addEventListener('click', () => switchTab(tabUploadBtn, tabUploadContent));
+        tabModeBtn.addEventListener('click', () => switchTab(tabModeBtn, tabModeContent));
+        tabTextBtn.addEventListener('click', () => switchTab(tabTextBtn, tabTextContent));
+        tabEffectsBtn.addEventListener('click', () => switchTab(tabEffectsBtn, tabEffectsContent));
+
+        // Canvas Direct Drag Interaction
+        let isDraggingCanvas = false;
+        let startX = 0;
+        let startY = 0;
+
+        function handlePointerDown(e) {
+            isDraggingCanvas = true;
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            startX = clientX;
+            startY = clientY;
+        }
+
+        function handlePointerMove(e) {
+            if (!isDraggingCanvas) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+
+            startX = clientX;
+            startY = clientY;
+
+            mediaOffsetX += dx * (512 / canvas.clientWidth);
+            mediaOffsetY += dy * (512 / canvas.clientHeight);
+
+            document.getElementById('mediaOffsetXInput').value = Math.round(mediaOffsetX);
+            document.getElementById('mediaOffsetYInput').value = Math.round(mediaOffsetY);
+        }
+
+        function handlePointerUp() {
+            isDraggingCanvas = false;
+        }
+
+        canvas.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+
+        canvas.addEventListener('touchstart', handlePointerDown, { passive: true });
+        window.addEventListener('touchmove', handlePointerMove, { passive: true });
+        window.addEventListener('touchend', handlePointerUp);
+
+        // Draw Mascot Characters
+        function drawMascot(targetCtx, charType, t) {
+            targetCtx.save();
+            targetCtx.translate(256 + mediaOffsetX, 270 + mediaOffsetY);
+
+            let offsetY = 0;
+            let rotation = (mediaRotate * Math.PI) / 180;
+            let scaleX = characterScale * mediaScale;
+            let scaleY = characterScale * mediaScale;
+
+            if (isAnimated) {
+                const spd = t * animationSpeed;
+                if (animationStyle === 'bounce') {
+                    offsetY = Math.abs(Math.sin(spd * 2)) * -30;
+                    scaleY = characterScale * mediaScale * (1 + Math.sin(spd * 4) * 0.05);
+                } else if (animationStyle === 'rotate') {
+                    rotation += Math.sin(spd * 2) * 0.25;
+                } else if (animationStyle === 'pulse') {
+                    const p = 1 + Math.sin(spd * 3) * 0.12;
+                    scaleX = characterScale * mediaScale * p;
+                    scaleY = characterScale * mediaScale * p;
+                } else if (animationStyle === 'float') {
+                    offsetY = Math.sin(spd * 1.5) * 20;
+                }
+            }
+
+            targetCtx.translate(0, offsetY);
+            targetCtx.rotate(rotation);
+            targetCtx.scale(scaleX, scaleY);
+
+            if (charType === 'sprout') {
+                // Tauge Mascot
+                targetCtx.beginPath();
+                targetCtx.ellipse(0, 30, 65, 80, 0, 0, Math.PI * 2);
+                targetCtx.fillStyle = '#86efac';
+                targetCtx.fill();
+                targetCtx.lineWidth = 8;
+                targetCtx.strokeStyle = '#166534';
+                targetCtx.stroke();
+
+                targetCtx.beginPath();
+                targetCtx.moveTo(0, -45);
+                targetCtx.quadraticCurveTo(-30, -90, -45, -80);
+                targetCtx.quadraticCurveTo(-25, -50, 0, -45);
+                targetCtx.fillStyle = '#4ade80';
+                targetCtx.fill();
+                targetCtx.stroke();
+
+                targetCtx.beginPath();
+                targetCtx.moveTo(0, -45);
+                targetCtx.quadraticCurveTo(30, -90, 45, -80);
+                targetCtx.quadraticCurveTo(25, -50, 0, -45);
+                targetCtx.fillStyle = '#22c55e';
+                targetCtx.fill();
+                targetCtx.stroke();
+
+                targetCtx.fillStyle = '#0f172a';
+                targetCtx.beginPath();
+                targetCtx.arc(-22, 15, 10, 0, Math.PI * 2);
+                targetCtx.arc(22, 15, 10, 0, Math.PI * 2);
+                targetCtx.fill();
+
+                targetCtx.fillStyle = '#ffffff';
+                targetCtx.beginPath();
+                targetCtx.arc(-25, 12, 4, 0, Math.PI * 2);
+                targetCtx.arc(19, 12, 4, 0, Math.PI * 2);
+                targetCtx.fill();
+
+                targetCtx.fillStyle = '#f43f5e';
+                targetCtx.globalAlpha = 0.5;
+                targetCtx.beginPath();
+                targetCtx.ellipse(-35, 30, 10, 6, 0, 0, Math.PI * 2);
+                targetCtx.ellipse(35, 30, 10, 6, 0, 0, Math.PI * 2);
+                targetCtx.fill();
+                targetCtx.globalAlpha = 1.0;
+
+                targetCtx.beginPath();
+                targetCtx.arc(0, 32, 16, 0.1 * Math.PI, 0.9 * Math.PI);
+                targetCtx.lineWidth = 6;
+                targetCtx.strokeStyle = '#0f172a';
+                targetCtx.lineCap = 'round';
+                targetCtx.stroke();
+
+            } else if (charType === 'cat') {
+                targetCtx.beginPath();
+                targetCtx.arc(0, 10, 80, 0, Math.PI * 2);
+                targetCtx.fillStyle = '#fde047';
+                targetCtx.fill();
+                targetCtx.lineWidth = 8;
+                targetCtx.strokeStyle = '#854d0e';
+                targetCtx.stroke();
+
+                targetCtx.beginPath();
+                targetCtx.moveTo(-60, -40); targetCtx.lineTo(-85, -100); targetCtx.lineTo(-20, -65);
+                targetCtx.fillStyle = '#fde047'; targetCtx.fill(); targetCtx.stroke();
+
+                targetCtx.beginPath();
+                targetCtx.moveTo(60, -40); targetCtx.lineTo(85, -100); targetCtx.lineTo(20, -65);
+                targetCtx.fillStyle = '#fde047'; targetCtx.fill(); targetCtx.stroke();
+
+                targetCtx.fillStyle = '#0f172a';
+                targetCtx.beginPath();
+                targetCtx.arc(-28, -5, 12, 0, Math.PI * 2);
+                targetCtx.arc(28, -5, 12, 0, Math.PI * 2);
+                targetCtx.fill();
+
+                targetCtx.beginPath();
+                targetCtx.arc(0, 15, 6, 0, Math.PI * 2);
+                targetCtx.fillStyle = '#f43f5e';
+                targetCtx.fill();
+
+                targetCtx.lineWidth = 4;
+                targetCtx.strokeStyle = '#0f172a';
+                targetCtx.beginPath();
+                targetCtx.moveTo(-50, 15); targetCtx.lineTo(-80, 10);
+                targetCtx.moveTo(-50, 25); targetCtx.lineTo(-80, 30);
+                targetCtx.moveTo(50, 15); targetCtx.lineTo(80, 10);
+                targetCtx.moveTo(50, 25); targetCtx.lineTo(80, 30);
+                targetCtx.stroke();
+
+            } else if (charType === 'ghost') {
+                targetCtx.beginPath();
+                targetCtx.arc(0, -20, 75, Math.PI, 0, false);
+                targetCtx.lineTo(75, 70);
+                targetCtx.quadraticCurveTo(50, 95, 25, 70);
+                targetCtx.quadraticCurveTo(0, 95, -25, 70);
+                targetCtx.quadraticCurveTo(-50, 95, -75, 70);
+                targetCtx.closePath();
+                targetCtx.fillStyle = '#e2e8f0';
+                targetCtx.fill();
+                targetCtx.lineWidth = 8;
+                targetCtx.strokeStyle = '#475569';
+                targetCtx.stroke();
+
+                targetCtx.fillStyle = '#0f172a';
+                targetCtx.beginPath();
+                targetCtx.ellipse(-25, -10, 12, 18, 0, 0, Math.PI * 2);
+                targetCtx.ellipse(25, -10, 12, 18, 0, 0, Math.PI * 2);
+                targetCtx.fill();
+
+                targetCtx.beginPath();
+                targetCtx.ellipse(0, 25, 10, 15, 0, 0, Math.PI * 2);
+                targetCtx.fill();
+
+            } else if (charType === 'fire') {
+                targetCtx.beginPath();
+                targetCtx.moveTo(0, -110);
+                targetCtx.quadraticCurveTo(80, -30, 75, 40);
+                targetCtx.quadraticCurveTo(70, 95, 0, 95);
+                targetCtx.quadraticCurveTo(-70, 95, -75, 40);
+                targetCtx.quadraticCurveTo(-80, -30, 0, -110);
+                targetCtx.fillStyle = '#f97316';
+                targetCtx.fill();
+                targetCtx.lineWidth = 8;
+                targetCtx.strokeStyle = '#9a3412';
+                targetCtx.stroke();
+
+                targetCtx.beginPath();
+                targetCtx.moveTo(0, -50);
+                targetCtx.quadraticCurveTo(45, 0, 40, 45);
+                targetCtx.quadraticCurveTo(35, 80, 0, 80);
+                targetCtx.quadraticCurveTo(-35, 80, -40, 45);
+                targetCtx.quadraticCurveTo(-45, 0, 0, -50);
+                targetCtx.fillStyle = '#facc15';
+                targetCtx.fill();
+
+                targetCtx.lineWidth = 6;
+                targetCtx.strokeStyle = '#0f172a';
+                targetCtx.beginPath();
+                targetCtx.arc(-22, 15, 10, Math.PI, 0);
+                targetCtx.arc(22, 15, 10, Math.PI, 0);
+                targetCtx.stroke();
+            }
+
+            targetCtx.restore();
+        }
+
+        // Draw Meme Text
+        function drawText(targetCtx) {
+            targetCtx.save();
+            targetCtx.textAlign = 'center';
+            targetCtx.font = `900 ${fontSize}px ${fontFamily}`;
+            targetCtx.fillStyle = textColor;
+            targetCtx.strokeStyle = strokeColor;
+            targetCtx.lineWidth = Math.max(4, fontSize / 7);
+            targetCtx.lineJoin = 'round';
+
+            if (topText) {
+                targetCtx.textBaseline = 'top';
+                targetCtx.strokeText(topText.toUpperCase(), 256, 25);
+                targetCtx.fillText(topText.toUpperCase(), 256, 25);
+            }
+
+            if (bottomText) {
+                targetCtx.textBaseline = 'bottom';
+                targetCtx.strokeText(bottomText.toUpperCase(), 256, 487);
+                targetCtx.fillText(bottomText.toUpperCase(), 256, 487);
+            }
+
+            targetCtx.restore();
+        }
+
+        // Main Frame Rendering Engine
+        function drawFrame(targetCtx, timeVal) {
+            targetCtx.clearRect(0, 0, 512, 512);
+
+            targetCtx.save();
+
+            // Apply Crop Shapes
+            if (cropShape === 'circle') {
+                targetCtx.beginPath();
+                targetCtx.arc(256, 256, 230, 0, Math.PI * 2);
+                targetCtx.clip();
+            } else if (cropShape === 'rounded') {
+                targetCtx.beginPath();
+                targetCtx.roundRect(30, 30, 452, 452, 50);
+                targetCtx.clip();
+            }
+
+            // Draw Uploaded Media (Video or Image)
+            if (mediaType === 'image' && uploadedImage) {
+                targetCtx.save();
+                targetCtx.translate(256 + mediaOffsetX, 256 + mediaOffsetY);
+                targetCtx.rotate((mediaRotate * Math.PI) / 180);
+                
+                const scale = Math.max(512 / uploadedImage.width, 512 / uploadedImage.height) * mediaScale;
+                const w = uploadedImage.width * scale;
+                const h = uploadedImage.height * scale;
+                
+                targetCtx.drawImage(uploadedImage, -w / 2, -h / 2, w, h);
+                targetCtx.restore();
+            } else if (mediaType === 'video' && uploadedVideo && !uploadedVideo.paused && !uploadedVideo.ended) {
+                targetCtx.save();
+                targetCtx.translate(256 + mediaOffsetX, 256 + mediaOffsetY);
+                targetCtx.rotate((mediaRotate * Math.PI) / 180);
+                
+                const scale = Math.max(512 / uploadedVideo.videoWidth, 512 / uploadedVideo.videoHeight) * mediaScale;
+                const w = uploadedVideo.videoWidth * scale;
+                const h = uploadedVideo.videoHeight * scale;
+                
+                targetCtx.drawImage(uploadedVideo, -w / 2, -h / 2, w, h);
+                targetCtx.restore();
+            } else if (!mediaType) {
+                // Draw Mascot when no custom media is uploaded
+                drawMascot(targetCtx, characterType, timeVal);
+            }
+
+            // Draw Cutout Sticker Border Effect
+            if (enableStickerBorder) {
+                targetCtx.save();
+                targetCtx.strokeStyle = borderColor;
+                targetCtx.lineWidth = borderWidth;
+                targetCtx.strokeRect(borderWidth / 2, borderWidth / 2, 512 - borderWidth, 512 - borderWidth);
+                targetCtx.restore();
+            }
+
+            targetCtx.restore();
+
+            // Draw Top / Bottom Meme Text
+            drawText(targetCtx);
+        }
+
+        // Animation Loop
+        function animateLoop() {
+            time += 0.03;
+            drawFrame(ctx, time);
+            animFrameId = requestAnimationFrame(animateLoop);
+        }
+
+        // WebP Binary Assembler & Encoder (VP8X + ANIM + ANMF)
+        async function createAnimatedWebp(frameBlobs, frameDurationMs = 80) {
+            const buffers = await Promise.all(frameBlobs.map(b => b.arrayBuffer()));
+            const frameChunks = [];
+
+            for (const buf of buffers) {
+                const u8 = new Uint8Array(buf);
+                if (u8.length < 12) continue;
+
+                const riff = String.fromCharCode(...u8.subarray(0, 4));
+                const webp = String.fromCharCode(...u8.subarray(8, 12));
+                if (riff !== 'RIFF' || webp !== 'WEBP') {
+                    throw new Error("Format frame bukan WebP valid");
+                }
+
+                let offset = 12;
+                const view = new DataView(buf);
+                const subChunks = [];
+
+                while (offset < u8.length - 8) {
+                    const fourCC = String.fromCharCode(...u8.subarray(offset, offset + 4));
+                    const chunkSize = view.getUint32(offset + 4, true);
+                    const totalChunkSize = 8 + chunkSize + (chunkSize % 2);
+
+                    if (offset + totalChunkSize > u8.length) break;
+
+                    if (fourCC === 'VP8 ' || fourCC === 'VP8L' || fourCC === 'ALPH') {
+                        subChunks.push(u8.subarray(offset, offset + totalChunkSize));
+                    }
+                    offset += totalChunkSize;
+                }
+                
+                if (subChunks.length === 0) {
+                    subChunks.push(u8.subarray(12));
+                }
+                frameChunks.push(subChunks);
+            }
+
+            if (frameChunks.length === 0) {
+                throw new Error("Tidak ada frame WebP yang valid");
+            }
+
+            const width = 512;
+            const height = 512;
+            let bodySize = 18 + 14; // VP8X (18 B) + ANIM (14 B)
+            
+            const framePayloads = [];
+            for (const subChunks of frameChunks) {
+                let pSize = 0;
+                for (const sc of subChunks) pSize += sc.length;
+                const pad = (pSize % 2 !== 0) ? 1 : 0;
+                framePayloads.push({ subChunks, pSize, pad });
+                bodySize += 24 + pSize + pad; // ANMF header size = 24 B
+            }
+
+            const totalFileSize = 12 + bodySize;
+            const out = new Uint8Array(totalFileSize);
+            const outView = new DataView(out.buffer);
+
+            let pos = 0;
+            function writeFourCC(str) {
+                for (let i = 0; i < 4; i++) out[pos++] = str.charCodeAt(i);
+            }
+
+            // 1. RIFF Header
+            writeFourCC('RIFF');
+            outView.setUint32(pos, totalFileSize - 8, true); pos += 4;
+            writeFourCC('WEBP');
+
+            // 2. VP8X Header
+            writeFourCC('VP8X');
+            outView.setUint32(pos, 10, true); pos += 4;
+            out[pos++] = 0x02 | 0x10; // Bit 1: Animation, Bit 4: Alpha
+            out[pos++] = 0; out[pos++] = 0; out[pos++] = 0;
+            const w1 = width - 1;
+            out[pos++] = w1 & 0xFF; out[pos++] = (w1 >> 8) & 0xFF; out[pos++] = (w1 >> 16) & 0xFF;
+            const h1 = height - 1;
+            out[pos++] = h1 & 0xFF; out[pos++] = (h1 >> 8) & 0xFF; out[pos++] = (h1 >> 16) & 0xFF;
+
+            // 3. ANIM Header
+            writeFourCC('ANIM');
+            outView.setUint32(pos, 6, true); pos += 4;
+            out[pos++] = 0; out[pos++] = 0; out[pos++] = 0; out[pos++] = 0; // Transparent BG
+            outView.setUint16(pos, 0, true); pos += 2; // Loop count = 0 (infinite)
+
+            // 4. ANMF Frame Chunks
+            for (const fp of framePayloads) {
+                writeFourCC('ANMF');
+                const anmfChunkSize = 16 + fp.pSize;
+                outView.setUint32(pos, anmfChunkSize, true); pos += 4;
+
+                out[pos++] = 0; out[pos++] = 0; out[pos++] = 0; // X = 0
+                out[pos++] = 0; out[pos++] = 0; out[pos++] = 0; // Y = 0
+                out[pos++] = w1 & 0xFF; out[pos++] = (w1 >> 8) & 0xFF; out[pos++] = (w1 >> 16) & 0xFF;
+                out[pos++] = h1 & 0xFF; out[pos++] = (h1 >> 8) & 0xFF; out[pos++] = (h1 >> 16) & 0xFF;
+                out[pos++] = frameDurationMs & 0xFF;
+                out[pos++] = (frameDurationMs >> 8) & 0xFF;
+                out[pos++] = (frameDurationMs >> 16) & 0xFF;
+                out[pos++] = 0x02; // Replace frame, no blend
+
+                for (const sc of fp.subChunks) {
+                    out.set(sc, pos);
+                    pos += sc.length;
+                }
+
+                if (fp.pad) {
+                    out[pos++] = 0;
+                }
+            }
+
+            return new Blob([out], { type: 'image/webp' });
+        }
+
+        // Export Function
+        async function exportSticker() {
+            progressContainer.classList.remove('hidden');
+            downloadWebpBtn.disabled = true;
+            downloadBtnText.textContent = "Memproses Stiker WebP...";
+
+            try {
+                if (!isAnimated && mediaType !== 'video') {
+                    // Export Static WEBP / PNG
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.90));
+                    if (blob && blob.type.includes('webp')) {
+                        showResultModal(blob, `stiker_wa_${Date.now()}.webp`, 'image/webp');
+                    } else {
+                        const pngBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                        showResultModal(pngBlob, `stiker_wa_${Date.now()}.png`, 'image/png');
+                    }
+                    return;
+                }
+
+                // Export Animated WEBP
+                const frameCount = 16;
+                const frameDelay = 80;
+                const frames = [];
+
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 512;
+                tempCanvas.height = 512;
+                const tempCtx = tempCanvas.getContext('2d');
+
+                for (let i = 0; i < frameCount; i++) {
+                    const t = (i / frameCount) * Math.PI * 2;
+                    
+                    if (mediaType === 'video' && uploadedVideo) {
+                        uploadedVideo.currentTime = (i / frameCount) * Math.min(uploadedVideo.duration || 3, 3);
+                        await new Promise(r => setTimeout(r, 30));
+                    }
+
+                    drawFrame(tempCtx, t);
+                    
+                    let blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/webp', 0.85));
+                    if (!blob || !blob.type.includes('webp')) {
+                        // Fallback canvas png if webp direct toBlob not supported by browser
+                        blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
+                    }
+                    frames.push(blob);
+
+                    const percent = Math.round(((i + 1) / frameCount) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressPercent.textContent = percent + '%';
+                }
+
+                try {
+                    const finalWebpBlob = await createAnimatedWebp(frames, frameDelay);
+                    showResultModal(finalWebpBlob, `stiker_wa_bergerak_${Date.now()}.webp`, 'image/webp');
+                } catch (e) {
+                    // If animated WEBP assembly fails, fallback to PNG frame
+                    const singlePng = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    showResultModal(singlePng, `stiker_wa_${Date.now()}.png`, 'image/png');
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast("Terjadi kendala saat memproses stiker.", "error");
+            } finally {
+                progressContainer.classList.add('hidden');
+                downloadWebpBtn.disabled = false;
+                downloadBtnText.textContent = "Buat & Unduh Stiker .WEBP";
+            }
+        }
+
+        // Show Output Modal
+        function showResultModal(blob, filename, mimeType) {
+            currentGeneratedBlob = blob;
+            if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+            currentObjectUrl = URL.createObjectURL(blob);
+
+            resultImagePreview.src = currentObjectUrl;
+            modalDownloadBtn.href = currentObjectUrl;
+            modalDownloadBtn.download = filename;
+
+            resultModal.classList.remove('hidden');
+            showToast("Stiker siap diunduh!");
+        }
+
+        closeModalBtn.addEventListener('click', () => {
+            resultModal.classList.add('hidden');
+        });
+
+        modalOpenTabBtn.addEventListener('click', () => {
+            if (currentObjectUrl) {
+                window.open(currentObjectUrl, '_blank');
+            }
+        });
+
+        modalCopyBtn.addEventListener('click', async () => {
+            if (!currentGeneratedBlob) return;
+            try {
+                // Copy PNG image to clipboard if possible
+                const item = new ClipboardItem({ [currentGeneratedBlob.type]: currentGeneratedBlob });
+                await navigator.clipboard.write([item]);
+                showToast("Gambar berhasil disalin ke clipboard!");
+            } catch (err) {
+                showToast("Gunakan 'Unduh File' atau 'Buka di Tab Baru'.", "warning");
+            }
+        });
+
+        // Export Single PNG Frame
+        downloadPngBtn.addEventListener('click', () => {
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    showResultModal(blob, `stiker_frame_${Date.now()}.png`, 'image/png');
+                }
+            }, 'image/png');
+        });
+
+        function showToast(msg, type = "success") {
+            toastMsg.textContent = msg;
+            if (type === "error") {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-rose-400 text-lg";
+            } else if (type === "warning") {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+
+        // Event Handlers for Uploader
+        const mediaUploadInput = document.getElementById('mediaUploadInput');
+        const uploadedMediaControls = document.getElementById('uploadedMediaControls');
+        const removeUploadedMediaBtn = document.getElementById('removeUploadedMediaBtn');
+
+        function loadMediaFile(file) {
+            if (!file) return;
+
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
+            loadingOverlayText.textContent = "Memuat file media...";
+
+            if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.muted = true;
+                video.loop = true;
+                video.playsInline = true;
+                video.onloadeddata = () => {
+                    video.play();
+                    uploadedVideo = video;
+                    uploadedImage = null;
+                    mediaType = 'video';
+                    isAnimated = true;
+                    uploadedMediaControls.classList.remove('hidden');
+                    loadingOverlay.classList.add('hidden');
+                    loadingOverlay.classList.remove('flex');
+                    document.getElementById('stickerTypeBadge').textContent = "Video WebP Loop";
+                    showToast("Video berhasil dimuat!");
+                };
+            } else {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        uploadedImage = img;
+                        uploadedVideo = null;
+                        mediaType = 'image';
+                        uploadedMediaControls.classList.remove('hidden');
+                        loadingOverlay.classList.add('hidden');
+                        loadingOverlay.classList.remove('flex');
+                        document.getElementById('stickerTypeBadge').textContent = "Gambar Stiker";
+                        showToast("Foto berhasil dimuat!");
+                    };
+                    img.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        mediaUploadInput.addEventListener('change', (e) => loadMediaFile(e.target.files[0]));
+
+        // Instant Sample Buttons
+        document.getElementById('sampleImageBtn').addEventListener('click', () => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                uploadedImage = img;
+                uploadedVideo = null;
+                mediaType = 'image';
+                uploadedMediaControls.classList.remove('hidden');
+                showToast("Sampel foto berhasil dimuat!");
+            };
+            img.src = "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=500&auto=format&fit=crop";
+        });
+
+        document.getElementById('sampleVideoBtn').addEventListener('click', () => {
+            const video = document.createElement('video');
+            video.crossOrigin = "anonymous";
+            video.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.onloadeddata = () => {
+                video.play();
+                uploadedVideo = video;
+                uploadedImage = null;
+                mediaType = 'video';
+                isAnimated = true;
+                uploadedMediaControls.classList.remove('hidden');
+                showToast("Sampel video berhasil dimuat!");
+            };
+        });
+
+        removeUploadedMediaBtn.addEventListener('click', () => {
+            uploadedImage = null;
+            if (uploadedVideo) {
+                uploadedVideo.pause();
+                uploadedVideo = null;
+            }
+            mediaType = null;
+            mediaUploadInput.value = '';
+            uploadedMediaControls.classList.add('hidden');
+            showToast("Media dihapus. Kembali ke mode maskot.");
+        });
+
+        // Media Scale, Rotate & Offsets
+        document.getElementById('mediaScaleInput').addEventListener('input', (e) => mediaScale = parseFloat(e.target.value));
+        document.getElementById('mediaRotateInput').addEventListener('input', (e) => mediaRotate = parseInt(e.target.value));
+        document.getElementById('mediaOffsetXInput').addEventListener('input', (e) => mediaOffsetX = parseInt(e.target.value));
+        document.getElementById('mediaOffsetYInput').addEventListener('input', (e) => mediaOffsetY = parseInt(e.target.value));
+
+        // Animated vs Static Toggle
+        const typeAnimatedBtn = document.getElementById('typeAnimatedBtn');
+        const typeStaticBtn = document.getElementById('typeStaticBtn');
+        const animationControls = document.getElementById('animationControls');
+
+        typeAnimatedBtn.addEventListener('click', () => {
+            isAnimated = true;
+            typeAnimatedBtn.classList.add('bg-emerald-500/10', 'border-emerald-500');
+            typeAnimatedBtn.classList.remove('bg-slate-800', 'border-slate-700', 'opacity-70');
+            
+            typeStaticBtn.classList.remove('bg-emerald-500/10', 'border-emerald-500');
+            typeStaticBtn.classList.add('bg-slate-800', 'border-slate-700', 'opacity-70');
+
+            animationControls.classList.remove('hidden');
+            document.getElementById('stickerTypeBadge').textContent = "Animasi WebP";
+        });
+
+        typeStaticBtn.addEventListener('click', () => {
+            isAnimated = false;
+            typeStaticBtn.classList.add('bg-emerald-500/10', 'border-emerald-500');
+            typeStaticBtn.classList.remove('bg-slate-800', 'border-slate-700', 'opacity-70');
+            
+            typeAnimatedBtn.classList.remove('bg-emerald-500/10', 'border-emerald-500');
+            typeAnimatedBtn.classList.add('bg-slate-800', 'border-slate-700', 'opacity-70');
+
+            animationControls.classList.add('hidden');
+            document.getElementById('stickerTypeBadge').textContent = "Statis WebP";
+        });
+
+        // Character Buttons
+        document.querySelectorAll('.char-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.char-btn').forEach(b => {
+                    b.classList.remove('bg-emerald-500/20', 'border-emerald-500');
+                    b.classList.add('bg-slate-800', 'border-slate-700');
+                });
+                btn.classList.add('bg-emerald-500/20', 'border-emerald-500');
+                btn.classList.remove('bg-slate-800', 'border-slate-700');
+                characterType = btn.dataset.character;
+            });
+        });
+
+        // Animation Style Controls
+        document.getElementById('animStyleSelect').addEventListener('change', (e) => animationStyle = e.target.value);
+        document.getElementById('animSpeedInput').addEventListener('input', (e) => animationSpeed = parseFloat(e.target.value));
+        document.getElementById('charScaleInput').addEventListener('input', (e) => characterScale = parseFloat(e.target.value));
+
+        // Text Controls
+        document.getElementById('topTextInput').addEventListener('input', (e) => topText = e.target.value);
+        document.getElementById('bottomTextInput').addEventListener('input', (e) => bottomText = e.target.value);
+        document.getElementById('textColorInput').addEventListener('input', (e) => textColor = e.target.value);
+        document.getElementById('textStrokeInput').addEventListener('input', (e) => strokeColor = e.target.value);
+        document.getElementById('fontSizeInput').addEventListener('input', (e) => fontSize = parseInt(e.target.value));
+        document.getElementById('fontFamilySelect').addEventListener('change', (e) => fontFamily = e.target.value);
+
+        // Border Cutout Effects
+        const stickerBorderToggle = document.getElementById('stickerBorderToggle');
+        const stickerBorderControls = document.getElementById('stickerBorderControls');
+
+        stickerBorderToggle.addEventListener('change', (e) => {
+            enableStickerBorder = e.target.checked;
+            if (enableStickerBorder) {
+                stickerBorderControls.classList.remove('hidden');
+            } else {
+                stickerBorderControls.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('borderWidthInput').addEventListener('input', (e) => borderWidth = parseInt(e.target.value));
+        document.getElementById('borderColorInput').addEventListener('input', (e) => borderColor = e.target.value);
+
+        // Shape Mask Controls
+        document.querySelectorAll('.shape-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.shape-btn').forEach(b => {
+                    b.classList.remove('bg-emerald-500/20', 'border-emerald-500', 'text-slate-200');
+                    b.classList.add('bg-slate-800', 'border-slate-700', 'text-slate-300');
+                });
+                btn.classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-slate-200');
+                cropShape = btn.dataset.shape;
+            });
+        });
+
+        // Reset All Settings
+        document.getElementById('resetCanvasBtn').addEventListener('click', () => {
+            topText = '';
+            bottomText = '';
+            mediaOffsetX = 0;
+            mediaOffsetY = 0;
+            mediaScale = 1.0;
+            mediaRotate = 0;
+            document.getElementById('topTextInput').value = '';
+            document.getElementById('bottomTextInput').value = '';
+            document.getElementById('mediaOffsetXInput').value = 0;
+            document.getElementById('mediaOffsetYInput').value = 0;
+            document.getElementById('mediaScaleInput').value = 1.0;
+            document.getElementById('mediaRotateInput').value = 0;
+            uploadedImage = null;
+            if (uploadedVideo) {
+                uploadedVideo.pause();
+                uploadedVideo = null;
+            }
+            mediaType = null;
+            uploadedMediaControls.classList.add('hidden');
+            enableStickerBorder = false;
+            stickerBorderToggle.checked = false;
+            stickerBorderControls.classList.add('hidden');
+            cropShape = 'none';
+            showToast("Canvas di-reset ke kondisi awal.");
+        });
+
+        // Trigger Export Action
+        downloadWebpBtn.addEventListener('click', exportSticker);
+
+        window.onload = () => {
+            animateLoop();
+        };
+    </script>
+</body>
+</html>
